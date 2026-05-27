@@ -25,6 +25,12 @@ def _chat_history_path():
 
 
 def _load_chat_history() -> list[dict]:
+    # DB first (survives container restarts on Render)
+    from core import db
+    if db.is_enabled():
+        return db.load_chat(current_user_id())
+
+    # Local filesystem fallback
     path = _chat_history_path()
     if not path.exists():
         return []
@@ -35,6 +41,11 @@ def _load_chat_history() -> list[dict]:
 
 
 def _save_chat_history(messages: list[dict]) -> None:
+    from core import db
+    if db.is_enabled():
+        if db.save_chat(current_user_id(), messages):
+            return
+        # If DB write fails, fall through to filesystem.
     try:
         _chat_history_path().write_text(
             json.dumps(messages, ensure_ascii=False, indent=2), encoding="utf-8"

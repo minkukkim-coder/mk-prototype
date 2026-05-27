@@ -69,9 +69,12 @@ def render_sidebar(models: list[dict], default_id: str) -> tuple[ModelConfig, Mo
     st.sidebar.divider()
     if st.sidebar.button("🗑 대화 초기화", width="stretch"):
         st.session_state.messages = []
-        # Also delete the persisted history file so it doesn't get reloaded
-        # on the next rerun.
-        from core.auth import current_user_data_dir
+        # Clear both DB (if enabled) and local filesystem copy so the next
+        # rerun doesn't reload stale history.
+        from core import db
+        from core.auth import current_user_data_dir, current_user_id
+        if db.is_enabled():
+            db.clear_chat(current_user_id())
         history_path = current_user_data_dir() / "chat_history.json"
         if history_path.exists():
             history_path.unlink()

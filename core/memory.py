@@ -53,7 +53,7 @@ class MemoryItem:
         return PROMPTS_DIR / f"{self.id}.md"
 
     def _user_path(self) -> Path:
-        """Current user's customized copy (created on save)."""
+        """Current user's customized copy on local filesystem (offline fallback)."""
         # Local import avoids a circular dependency at module load time.
         from core.auth import current_user_data_dir
         d = current_user_data_dir() / "prompts" / "memory_items"
@@ -61,26 +61,50 @@ class MemoryItem:
         return d / f"{self.id}.md"
 
     def prompt_path(self) -> Path:
-        """Path of the prompt that's currently active for this user."""
+        """Path of the prompt that's currently active for this user (filesystem mode)."""
         up = self._user_path()
         return up if up.exists() else self._default_path()
 
     def load_prompt(self) -> str:
-        """User's copy wins; fall back to shipped default."""
-        up = self._user_path()
-        if up.exists():
-            return up.read_text(encoding="utf-8")
+        """User's customization wins; fall back to shipped default.
+
+        Resolution order: DB → user filesystem → shipped default.
+        """
+        from core import db
+        if db.is_enabled():
+            from core.auth import current_user_id
+            content = db.load_custom_prompt(current_user_id(), "memory_item", self.id)
+            if content is not None:
+                return content
+        else:
+            up = self._user_path()
+            if up.exists():
+                return up.read_text(encoding="utf-8")
         return self._default_path().read_text(encoding="utf-8")
 
     def save_prompt(self, content: str) -> None:
-        """Always saves to the user's directory."""
+        """Save to DB if enabled, else local filesystem."""
+        from core import db
+        if db.is_enabled():
+            from core.auth import current_user_id
+            if db.save_custom_prompt(current_user_id(), "memory_item", self.id, content):
+                return
         self._user_path().write_text(content, encoding="utf-8")
 
     def is_customized(self) -> bool:
+        from core import db
+        if db.is_enabled():
+            from core.auth import current_user_id
+            return self.id in db.list_custom_prompt_names(current_user_id(), "memory_item")
         return self._user_path().exists()
 
     def reset_to_default(self) -> None:
         """Delete the user's copy so the shipped default takes over again."""
+        from core import db
+        if db.is_enabled():
+            from core.auth import current_user_id
+            db.delete_custom_prompt(current_user_id(), "memory_item", self.id)
+            return
         up = self._user_path()
         if up.exists():
             up.unlink()
@@ -95,6 +119,13 @@ def load_schema() -> list[MemoryItem]:
 # ---------- State persistence ----------
 
 def load_state() -> dict[str, dict]:
+    # Try DB first (persistent across container restarts on Render)
+    from core import db
+    if db.is_enabled():
+        from core.auth import current_user_id
+        return db.load_memory(current_user_id())
+
+    # Local filesystem fallback (offline dev)
     path = state_path()
     if not path.exists():
         return {}
@@ -105,12 +136,25 @@ def load_state() -> dict[str, dict]:
 
 
 def save_state(state: dict[str, dict]) -> None:
+    from core import db
+    if db.is_enabled():
+        from core.auth import current_user_id
+        if db.save_memory(current_user_id(), state):
+            return
+        # If DB write fails, still write locally as last-resort safety net.
+
     state_path().write_text(
         json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
 
 def clear_state() -> None:
+    from core import db
+    if db.is_enabled():
+        from core.auth import current_user_id
+        db.clear_memory(current_user_id())
+        return
+
     path = state_path()
     if path.exists():
         path.unlink()
