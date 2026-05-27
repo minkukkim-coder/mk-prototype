@@ -89,10 +89,25 @@ def render_chat_prompt_editor() -> None:
     )
     st.session_state[_k("text")] = edited
 
-    col_save, col_saveas, col_del = st.columns([1, 2, 1])
-    with col_save:
+    st.divider()
+    st.markdown("##### 저장")
+
+    save_tab, saveas_tab, manage_tab = st.tabs(
+        [
+            f"💾 '{current_name}'에 덮어쓰기",
+            "📋 새 프롬프트로 저장 (이름 입력 후 저장)",
+            "🗑 삭제 / 기본값 복원",
+        ]
+    )
+
+    # ---- Tab 1: overwrite current ----
+    with save_tab:
+        st.caption(
+            f"현재 편집 내용을 **'{current_name}'** 에 저장합니다. "
+            f"같은 이름의 이전 내용은 사라집니다."
+        )
         if st.button(
-            f"💾 '{current_name}'에 내 버전으로 저장",
+            f"💾 '{current_name}'에 저장",
             key=_k("save_btn"),
             width="stretch",
             type="primary",
@@ -101,38 +116,66 @@ def render_chat_prompt_editor() -> None:
             st.success(f"'{current_name}' — 본인 계정에 저장됨")
             st.rerun()
 
-    with col_saveas:
-        new_name = st.text_input(
-            "다른 이름으로 저장",
-            key=_k("saveas_input"),
-            placeholder="새 프롬프트 이름 (예: v2-공감강조)",
-            label_visibility="collapsed",
+    # ---- Tab 2: save as new (multiple prompts) ----
+    with saveas_tab:
+        st.caption(
+            "현재 편집 내용을 **새 이름으로** 저장합니다. "
+            "기존 프롬프트는 그대로 남고, 새 프롬프트가 드롭다운에 추가됩니다."
         )
-        if st.button("💾 다른 이름으로 저장", key=_k("saveas_btn"), width="stretch"):
-            if not new_name.strip():
-                st.warning("이름을 입력하세요.")
-            else:
-                actual = save_prompt("chat", new_name, edited)
-                st.session_state[_k("name")] = actual
-                st.success(f"'{actual}' — 본인 계정에 저장됨")
-                st.rerun()
+        new_name = st.text_input(
+            "새 프롬프트 이름",
+            key=_k("saveas_input"),
+            placeholder="예: v2-공감강조  |  단답형  |  코칭톤",
+        )
+        if st.button(
+            "📋 새 프롬프트로 저장",
+            key=_k("saveas_btn"),
+            width="stretch",
+            type="primary",
+            disabled=not new_name.strip(),
+        ):
+            actual = save_prompt("chat", new_name, edited)
+            st.session_state[_k("name")] = actual
+            st.success(
+                f"새 프롬프트 '{actual}' 생성됨. 상단 드롭다운에서 선택해서 사용하세요."
+            )
+            st.rerun()
 
-    with col_del:
-        st.write("")
+    # ---- Tab 3: delete / reset to default ----
+    with manage_tab:
         # If this is a customization of a shipped default, deleting actually
         # "resets to default" (the default file is untouched). For user-only
         # prompts it deletes outright. Disable button when there's nothing to delete.
         is_custom = is_customized("chat", current_name)
         has_def = has_default("chat", current_name)
         if is_custom and has_def:
-            label, help_text = "↩️ 기본값으로 복원", "본인 커스텀 버전 삭제 후 기본값으로 복원"
+            label = f"↩️ '{current_name}'을 기본값으로 복원"
+            help_text = "본인 커스텀 버전을 삭제하고 기본값으로 되돌립니다."
+            caption = (
+                f"'{current_name}' 프롬프트는 본인이 커스터마이즈한 버전이 있습니다. "
+                "기본값으로 복원하면 본인 수정 내용이 사라지고, 다른 팀원과 동일한 기본값이 적용됩니다."
+            )
         elif is_custom:
-            label, help_text = "🗑 내 프롬프트 삭제", "본인 커스텀 프롬프트 삭제"
+            label = f"🗑 '{current_name}' 프롬프트 삭제"
+            help_text = "본인 커스텀 프롬프트를 영구 삭제합니다."
+            caption = (
+                f"'{current_name}'은 본인이 새로 만든 프롬프트입니다. "
+                "삭제하면 영구히 사라집니다 (다른 팀원에게는 영향 없음)."
+            )
         else:
-            label, help_text = "🗑 삭제", "삭제할 본인 버전이 없습니다."
-        if st.button(label, key=_k("del_btn"), disabled=not is_custom, help=help_text, width="stretch"):
+            label = "🗑 삭제 불가"
+            help_text = "기본값은 삭제할 수 없으며, 본인이 만든 커스텀 버전도 없습니다."
+            caption = f"'{current_name}'은 기본값입니다. 삭제할 본인 버전이 없습니다."
+
+        st.caption(caption)
+        if st.button(
+            label,
+            key=_k("del_btn"),
+            disabled=not is_custom,
+            help=help_text,
+            width="stretch",
+        ):
             delete_prompt("chat", current_name)
-            # Fall back to default; if the deleted item was user-only, switch to DEFAULT_NAME.
             fallback = current_name if has_def else DEFAULT_NAME
             st.session_state[_k("name")] = fallback
             st.session_state[_k("text")] = load_prompt("chat", fallback)
