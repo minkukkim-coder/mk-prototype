@@ -1,0 +1,63 @@
+# Models available in the sidebar selector.
+# Edit this file to add/remove models. The app picks up changes on rerun.
+#
+# Schema per entry:
+#   id:       Unique key used internally (any string, must be unique).
+#   label:    Display name shown in the UI dropdown.
+#   provider: One of "google", "anthropic", "openai".
+#   model:    The exact model identifier the provider's API expects.
+#             ⚠️  IMPORTANT: model IDs change. If you see a 404/NotFound,
+#             check the provider docs and update the `model` field.
+#
+# The `default` field at the bottom controls which model is preselected.
+
+models:
+  # ---- Google Gemini ----
+  - id: gemini-3-1-flash-lite
+    label: "Gemini 3.1 Flash Lite (default)"
+    provider: google
+    model: gemini-3.1-flash-lite
+
+  - id: gemini-3-5-flash
+    label: "Gemini 3.5 Flash"
+    provider: google
+    model: gemini-3.5-flash
+
+  - id: gemini-2-5-pro
+    label: "Gemini 2.5 Pro"
+    provider: google
+    model: gemini-2.5-pro
+
+  # ---- Anthropic Claude ----
+  - id: claude-haiku
+    label: "Claude Haiku 4.5"
+    provider: anthropic
+    model: claude-haiku-4-5
+
+  - id: claude-sonnet
+    label: "Claude Sonnet 4.6"
+    provider: anthropic
+    model: claude-sonnet-4-6
+
+  - id: claude-opus
+    label: "Claude Opus 4.7"
+    provider: anthropic
+    model: claude-opus-4-7
+
+  # ---- OpenAI ----
+  - id: gpt-5-4-mini
+    label: "GPT-5.4 mini"
+    provider: openai
+    model: gpt-5.4-mini
+
+  - id: gpt-5-4
+    label: "GPT-5.4"
+    provider: openai
+    model: gpt-5.4
+
+  - id: gpt-5-5
+    label: "GPT-5.5"
+    provider: openai
+    model: gpt-5.5
+
+default: gemini-3-1-flash-lite

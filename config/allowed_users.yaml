@@ -1,0 +1,12 @@
+# Whitelist of Google account emails allowed to use this prototype.
+#
+# Add team members one per line under `emails:`. Anyone who logs in with
+# Google but whose email is NOT on this list will see a "권한 없음" screen.
+#
+# To update the deployed app, edit this file and push to GitHub —
+# Streamlit Community Cloud will redeploy automatically.
+
+emails:
+  - minkuk.kim@octoscorp.ai
+  # - teammate1@example.com
+  # - teammate2@example.com

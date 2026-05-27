@@ -1,0 +1,157 @@
+# Memory framework schema (29 items).
+#
+# Each entry describes one extraction target. The actual extraction prompt
+# lives in `config/prompts/memory_items/<id>.md` and is editable in the UI.
+#
+# Fields:
+#   id:            stable identifier used in code and JSON state
+#   title:         Korean display name shown in UI
+#   category:      grouping for the table view (Korean)
+#   output_fields: keys that the LLM must return in its JSON response
+#                  (always includes "Status"; other fields vary per item)
+
+items:
+  - id: "01_occupation"
+    title: "직업 및 주요 활동"
+    category: "환경 및 사회적 기능"
+    output_fields: [Status, OccupationSnapshot, CriticalCareerEvent]
+
+  - id: "02_economic"
+    title: "경제적 상태"
+    category: "환경 및 사회적 기능"
+    output_fields: [Status, EconomicSnapshot, CriticalFinancialEvent]
+
+  - id: "03_parents"
+    title: "부모"
+    category: "원가족 역동"
+    output_fields: [Status, ParentalSnapshot, RelationalAmbivalence]
+
+  - id: "04_siblings"
+    title: "형제 및 방계 가족"
+    category: "원가족 역동"
+    output_fields: [Status, SiblingSnapshot]
+
+  - id: "05_romantic"
+    title: "배우자 혹은 연인"
+    category: "애착 역동"
+    output_fields: [Status, RomanticSnapshot]
+
+  - id: "06_friends"
+    title: "친구"
+    category: "사회적 지지망"
+    output_fields: [Status, SocialSnapshot]
+
+  - id: "07_parenting"
+    title: "자녀 및 양육 맥락"
+    category: "자녀 및 양육"
+    output_fields: [Status, ParentingSnapshot]
+
+  - id: "08_colleagues"
+    title: "동료 및 직장 역동"
+    category: "사회적 생존"
+    output_fields: [Status, WorkplaceSnapshot]
+
+  - id: "09_leisure"
+    title: "놀이 및 취미"
+    category: "자발적 에너지"
+    output_fields: [Status, LeisureSnapshot]
+
+  - id: "10_interests"
+    title: "주요 관심사 및 가치"
+    category: "능동적 동기"
+    output_fields: [Status, InterestValueSnapshot]
+
+  - id: "11_regulation"
+    title: "감정조절 역동"
+    category: "심리적 동태"
+    output_fields: [Status, RegulationSnapshot]
+
+  - id: "12_reward"
+    title: "보상 시스템"
+    category: "심리적 동태"
+    output_fields: [Status, RewardSnapshot]
+
+  - id: "13_somatic"
+    title: "신체 증상 및 신체화"
+    category: "생물학적 토대"
+    output_fields: [Status, SomaticSnapshot]
+
+  - id: "14_crisis"
+    title: "자해 및 자해 사고"
+    category: "위기 관리"
+    output_fields: [Status, CrisisSnapshot]
+
+  - id: "15_sexual"
+    title: "성적 정체성 및 성 역동"
+    category: "성적 정체성 및 성 역동"
+    output_fields: [Status, SexualSnapshot]
+
+  - id: "16_empathy"
+    title: "공감 및 사회적 인지"
+    category: "공감 및 사회적 인지"
+    output_fields: [Status, SocialCognitionSnapshot]
+
+  - id: "17_self_image"
+    title: "자아상 및 정체성"
+    category: "자아상 및 정체성"
+    output_fields: [Status, SelfImageSnapshot]
+
+  - id: "18_developmental"
+    title: "성장기 및 생애 각본"
+    category: "발달 배경"
+    output_fields: [Status, DevelopmentalSnapshot]
+
+  - id: "19_health"
+    title: "의학적 과거력 및 신체 건강"
+    category: "생물학적 토대"
+    output_fields: [Status, HealthSnapshot]
+
+  - id: "20_stress"
+    title: "스트레스 반응 및 대처 기제"
+    category: "심리적 동태"
+    output_fields: [Status, StressSnapshot]
+
+  - id: "21_strengths"
+    title: "성공 경험 및 핵심 강점"
+    category: "심리적 자산"
+    output_fields: [Status, StrengthsSnapshot, CriticalEmpowermentPoint]
+
+  - id: "22_residential"
+    title: "거주지 및 가구 역동"
+    category: "환경 및 사회적 기능"
+    output_fields: [Status, ResidentSnapshot, CriticalResidentialEvent]
+
+  - id: "23_worldview"
+    title: "사회적 성향과 시선"
+    category: "가치관 및 세계관"
+    output_fields: [Status, PerspectiveSnapshot, RecentDetailDiscovery]
+
+  - id: "24_tastes"
+    title: "세밀한 선호 및 정서적 닻"
+    category: "정서적 유대와 취향"
+    output_fields: [Status, TasteSnapshot, RecentDetailDiscovery]
+
+  - id: "25_concerns"
+    title: "최근 고민의 흐름"
+    category: "심리적 동태"
+    output_fields: [Status, ConcernsFlowSnapshot, CriticalConcernShift]
+
+  - id: "26_meaning"
+    title: "삶의 의미와 영성/신념"
+    category: "서사와 가치"
+    output_fields: [Status, CurrentMeaningBeliefs, BeliefFlowHistory, CoreExistentialTheme]
+
+  - id: "27_grief"
+    title: "상실과 애도"
+    category: "서사와 가치"
+    output_fields: [Status, GriefSnapshot, CommemorativeDetail]
+
+  - id: "28_communication"
+    title: "의사소통 및 갈등 해결 스타일"
+    category: "심리적 엔진"
+    output_fields: [Status, CommunicationSnapshot, RelationalStrategy]
+
+  - id: "29_future"
+    title: "미래 비전 및 희망"
+    category: "취향 및 활력"
+    output_fields: [Status, FutureSnapshot, HopeAnchor]
