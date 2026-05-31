@@ -108,6 +108,8 @@ def _render_item_editor(items: list[MemoryItem]) -> None:
         key=f"memory_edit_text_{item.id}",
     )
 
+    text_key = f"memory_edit_text_{item.id}"
+
     col_save, col_reset, col_reload = st.columns([1, 1, 1])
     with col_save:
         if st.button("💾 내 버전으로 저장", key=f"memory_save_{item.id}", width="stretch", type="primary"):
@@ -124,10 +126,15 @@ def _render_item_editor(items: list[MemoryItem]) -> None:
             help="본인 커스텀 버전을 삭제하고 기본값으로 되돌립니다." if not disabled else "이미 기본값을 보고 있습니다.",
         ):
             item.reset_to_default()
+            # Refresh the textarea's session_state so it reloads the default
+            # content instead of keeping the user's last unsaved edit.
+            st.session_state[text_key] = item.load_prompt()
             st.success(f"{item.title} — 기본값으로 복원됨")
             st.rerun()
     with col_reload:
         if st.button("🔄 다시 불러오기", key=f"memory_reload_{item.id}", width="stretch"):
+            # Force the textarea to reload from disk/DB.
+            st.session_state[text_key] = item.load_prompt()
             st.rerun()
 
 

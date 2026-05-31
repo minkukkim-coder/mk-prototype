@@ -72,8 +72,12 @@ def render_chat_prompt_editor() -> None:
     with col_load:
         st.write("")
         if st.button("불러오기", key=_k("load_btn"), width="stretch"):
+            new_content = load_prompt("chat", chosen)
             st.session_state[_k("name")] = chosen
-            st.session_state[_k("text")] = load_prompt("chat", chosen)
+            st.session_state[_k("text")] = new_content
+            # Must also update the widget's own session_state key — otherwise
+            # st.text_area keeps showing its previous content and ignores `value=`.
+            st.session_state[_k("textarea")] = new_content
             st.rerun()
 
     if is_customized("chat", current_name):
@@ -177,7 +181,10 @@ def render_chat_prompt_editor() -> None:
         ):
             delete_prompt("chat", current_name)
             fallback = current_name if has_def else DEFAULT_NAME
+            new_content = load_prompt("chat", fallback)
             st.session_state[_k("name")] = fallback
-            st.session_state[_k("text")] = load_prompt("chat", fallback)
+            st.session_state[_k("text")] = new_content
+            # Sync widget key so the text area actually refreshes (same gotcha as load).
+            st.session_state[_k("textarea")] = new_content
             st.success(f"'{current_name}' 처리 완료")
             st.rerun()
